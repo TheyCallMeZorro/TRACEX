@@ -7,9 +7,13 @@ TraceX is a browser-based security log analysis tool designed to help analyze, v
 
 It parses uploaded log files, extracts useful security information, calculates activity statistics, and detects potentially suspicious behavior such as repeated failed logins, brute-force attempts, scanning activity, unauthorized access, and other security indicators.
 
+<img width="1365" height="662" alt="TRACEX_13" src="https://github.com/user-attachments/assets/800cd9f1-7bf7-47c4-b5fd-572403d72594" />
+
 ---
 
 ## ✨ Features
+<img width="1350" height="655" alt="TRACEX_3" src="https://github.com/user-attachments/assets/4063f5a6-8b5e-42e4-b23b-8f5163d40fd4" />
+
 
 ### 📊 Security Dashboard
 
@@ -26,6 +30,8 @@ It parses uploaded log files, extracts useful security information, calculates a
 * Recent security alerts
 
 ### 📄 Log Viewer
+<img width="1363" height="633" alt="TRACEX_4" src="https://github.com/user-attachments/assets/7bee9f44-6a68-4c4a-a132-c61d1236ac71" />
+
 
 * Browse parsed log entries
 * View timestamps
@@ -37,6 +43,8 @@ It parses uploaded log files, extracts useful security information, calculates a
 
 ### 🔎 Search & Filtering
 
+<img width="1365" height="552" alt="TRACEX_6" src="https://github.com/user-attachments/assets/03fe5683-2535-4170-b5b8-f85dbe616732" />
+
 * Full-text log search
 * IP filtering
 * Username filtering
@@ -45,6 +53,7 @@ It parses uploaded log files, extracts useful security information, calculates a
 * Reset filters
 
 ### 🛡️ Security Detection
+<img width="1143" height="587" alt="TRACEX_10" src="https://github.com/user-attachments/assets/f01c5dab-dde8-4318-8e22-60d7607d20ab" />
 
 TraceX can identify patterns related to:
 
@@ -70,6 +79,7 @@ TraceX can identify patterns related to:
 * Statistics visualization
 
 ### 📑 Reports & Export
+<img width="1150" height="333" alt="TRACEX_12" src="https://github.com/user-attachments/assets/6de1b43c-44c7-4f1d-8417-cef61704d59b" />
 
 * Export analyzed logs as CSV
 * Generate security analysis reports
@@ -94,6 +104,8 @@ TraceX can identify patterns related to:
 
 TraceX currently runs entirely in the browser for log parsing and analysis.
 
+
+
 ---
 
 ## 📁 Project Structure
@@ -113,8 +125,6 @@ TraceX/
 │   ├── charts.js
 │   └── app.js
 │
-├── data/
-│   └── sample.log
 │
 ├── assets/
 │
