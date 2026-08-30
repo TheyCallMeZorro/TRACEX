@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Trace X- Graphical Log Analyzer</title>
+
+    <meta
+        name="description"
+        content="LogScope is a graphical web-based log analyzer for analyzing security logs and detecting suspicious activity."
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- =========================
+         APPLICATION
+    ========================== -->
+
+    <div class="app">
+
+        <!-- =========================
+             SIDEBAR
+        ========================== -->
+
+        <aside class="sidebar" id="sidebar">
+
+            <div class="brand">
+
+                <div class="brand-icon">
+                    <span>&lt;/&gt;</span>
+                </div>
+
+                <div class="brand-text">
+                    <h1>TRACEX</h1>
+                    <span>Graphical Log Analyzer</span>
+                </div>
+
+            </div>
+
+            <button class="sidebar-toggle" id="sidebarToggle">
+                ☰
+            </button>
+
+            <nav class="sidebar-nav">
+
+                <div class="nav-section-title">
+                    ANALYSIS
+                </div>
+
+                <button class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">▦</span>
+                    <span class="nav-label">Dashboard</span>
+                </button>
+
+                <button class="nav-item" data-page="logs">
+                    <span class="nav-icon">▤</span>
+                    <span class="nav-label">Log Viewer</span>
+                </button>
+
+                <button class="nav-item" data-page="search">
+                    <span class="nav-icon">⌕</span>
+                    <span class="nav-label">Search / Filter</span>
+                </button>
+
+                <button class="nav-item" data-page="statistics">
+                    <span class="nav-icon">▥</span>
+                    <span class="nav-label">Statistics</span>
+                </button>
+
+                <button class="nav-item" data-page="ip-analysis">
+                    <span class="nav-icon">◎</span>
+                    <span class="nav-label">IP Analysis</span>
+                </button>
+
+                <button class="nav-item" data-page="user-analysis">
+                    <span class="nav-icon">♙</span>
+                    <span class="nav-label">User Analysis</span>
+                </button>
+
+                <div class="nav-section-title">
+                    SECURITY
+                </div>
+
+                <button class="nav-item" data-page="failed-logins">
+                    <span class="nav-icon">◉</span>
+                    <span class="nav-label">Failed Logins</span>
+                </button>
+
+                <button class="nav-item" data-page="suspicious">
+                    <span class="nav-icon">⚠</span>
+                    <span class="nav-label">Suspicious Events</span>
+                    <span class="nav-badge danger" id="suspiciousBadge">0</span>
+                </button>
+
+                <button class="nav-item" data-page="brute-force">
+                    <span class="nav-icon">◎</span>
+                    <span class="nav-label">Brute Force Detect</span>
+                    <span class="nav-badge danger" id="bruteForceBadge">0</span>
+                </button>
+
+                <div class="nav-section-title">
+                    MANAGEMENT
+                </div>
+
+                <button class="nav-item" data-page="history">
+                    <span class="nav-icon">◷</span>
+                    <span class="nav-label">Scan History</span>
+                </button>
+
+                <button class="nav-item" data-page="reports">
+                    <span class="nav-icon">▧</span>
+                    <span class="nav-label">Reports</span>
+                </button>
+
+                <button class="nav-item" data-page="settings">
+                    <span class="nav-icon">⚙</span>
+                    <span class="nav-label">Settings</span>
+                </button>
+
+            </nav>
+
+            <!-- Scan Summary -->
+
+            <div class="scan-summary">
+
+                <h3>Scan Summary</h3>
+
+                <div class="summary-row">
+                    <span>Total Logs</span>
+                    <strong id="summaryTotalLogs">0</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Unique IPs</span>
+                    <strong id="summaryUniqueIPs">0</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Users</span>
+                    <strong id="summaryUsers">0</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Failed Logins</span>
+                    <strong id="summaryFailedLogins">0</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Suspicious Events</span>
+                    <strong class="danger-text" id="summarySuspicious">0</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Brute Force Alerts</span>
+                    <strong class="danger-text" id="summaryBruteForce">0</strong>
+                </div>
+
+                <div class="summary-divider"></div>
+
+                <div class="last-scan">
+                    Last Scan:
+                    <span id="lastScan">No scan</span>
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =========================
+             MAIN CONTENT
+        ========================== -->
+
+        <main class="main-content">
+
+            <!-- =========================
+                 TOP BAR
+            ========================== -->
+
+            <header class="topbar">
+
+                <div class="topbar-left">
+
+                    <div class="mobile-menu" id="mobileMenu">
+                        ☰
+                    </div>
+
+                    <div class="file-info">
+
+                        <div class="file-name" id="currentFileName">
+                            No log file loaded
+                        </div>
+
+                        <div class="file-meta" id="currentFileMeta">
+                            Upload a log file to begin analysis
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="topbar-actions">
+
+                    <label class="top-action upload-action">
+
+                        <input
+                            type="file"
+                            id="logFileInput"
+                            accept=".log,.txt,.csv"
+                            hidden
+                        >
+
+                        <span class="action-icon">□</span>
+                        <span>Open Log</span>
+
+                    </label>
+
+                    <button class="top-action" id="exportBtn">
+                        <span class="action-icon">⇧</span>
+                        <span>Export</span>
+                    </button>
+
+                    <button class="top-action" id="reportBtn">
+                        <span class="action-icon">▤</span>
+                        <span>Report</span>
+                    </button>
+
+                    <button class="top-action" data-page="settings">
+                        <span class="action-icon">⚙</span>
+                        <span>Settings</span>
+                    </button>
+
+                    <button class="top-action" id="helpBtn">
+                        <span class="action-icon">?</span>
+                        <span>Help</span>
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            <!-- =========================
+                 PAGE CONTAINER
+            ========================== -->
+
+            <div class="page-container">
+
+
+                <!-- =========================
+                     DASHBOARD PAGE
+                ========================== -->
+
+                <section class="page active" id="dashboardPage">
+
+                    <div class="page-header">
+
+                        <div>
+                            <h2>Security Dashboard</h2>
+                            <p>
+                                Overview of your analyzed log activity
+                            </p>
+                        </div>
+
+                        <div class="dashboard-actions">
+
+                            <button
+                                class="secondary-btn"
+                                id="clearLogsBtn"
+                            >
+                                Clear
+                            </button>
+
+                            <label class="primary-btn">
+
+                                <input
+                                    type="file"
+                                    id="dashboardFileInput"
+                                    accept=".log,.txt,.csv"
+                                    hidden
+                                >
+
+                                + Analyze Log
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================
+                         STAT CARDS
+                    ========================== -->
+
+                    <div class="stats-grid">
+
+                        <div class="stat-card">
+
+                            <div class="stat-icon blue">
+                                ▤
+                            </div>
+
+                            <div class="stat-content">
+                                <span>Total Logs</span>
+                                <strong id="totalLogs">0</strong>
+                                <small>All log entries</small>
+                            </div>
+
+                        </div>
+
+
+                        <div class="stat-card">
+
+                            <div class="stat-icon green">
+                                ◎
+                            </div>
+
+                            <div class="stat-content">
+                                <span>Unique IPs</span>
+                                <strong id="uniqueIPs">0</strong>
+                                <small>Distinct IP addresses</small>
+                            </div>
+
+                        </div>
+
+
+                        <div class="stat-card">
+
+                            <div class="stat-icon purple">
+                                ♙
+                            </div>
+
+                            <div class="stat-content">
+                                <span>Users</span>
+                                <strong id="totalUsers">0</strong>
+                                <small>Unique users</small>
+                            </div>
+
+                        </div>
+
+
+                        <div class="stat-card">
+
+                            <div class="stat-icon orange">
+                                🔒
+                            </div>
+
+                            <div class="stat-content">
+                                <span>Failed Logins</span>
+                                <strong id="failedLogins">0</strong>
+                                <small>Failed login attempts</small>
+                            </div>
+
+                        </div>
+
+
+                        <div class="stat-card">
+
+                            <div class="stat-icon red">
+                                🛡
+                            </div>
+
+                            <div class="stat-content">
+                                <span>Suspicious Events</span>
+                                <strong id="suspiciousEvents">0</strong>
+                                <small>Potential threats</small>
+                            </div>
+
+                        </div>
+
+
+                        <div class="stat-card">
+
+                            <div class="stat-icon danger">
+                                ◎
+                            </div>
+
+                            <div class="stat-content">
+                                <span>Brute Force Alerts</span>
+                                <strong id="bruteForceAlerts">0</strong>
+                                <small>Detected attacks</small>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================
+                         CHARTS
+                    ========================== -->
+
+                    <div class="charts-grid">
+
+                        <!-- Logs Over Time -->
+
+                        <div class="panel chart-panel large">
+
+                            <div class="panel-header">
+
+                                <div>
+                                    <h3>Logs Over Time</h3>
+                                    <span>Log activity timeline</span>
+                                </div>
+
+                                <select id="timeRange">
+                                    <option value="all">All Time</option>
+                                    <option value="24h">Last 24 Hours</option>
+                                    <option value="7d">Last 7 Days</option>
+                                    <option value="30d">Last 30 Days</option>
+                                </select>
+
+                            </div>
+
+                            <div class="chart-container">
+                                <canvas id="logsTimelineChart"></canvas>
+                            </div>
+
+                        </div>
+
+
+                        <!-- IP Chart -->
+
+                        <div class="panel chart-panel">
+
+                            <div class="panel-header">
+
+                                <div>
+                                    <h3>Top IP Addresses</h3>
+                                    <span>Most active sources</span>
+                                </div>
+
+                            </div>
+
+                            <div class="chart-container doughnut">
+                                <canvas id="ipChart"></canvas>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Log Levels -->
+
+                        <div class="panel chart-panel">
+
+                            <div class="panel-header">
+
+                                <div>
+                                    <h3>Log Levels</h3>
+                                    <span>Event severity distribution</span>
+                                </div>
+
+                            </div>
+
+                            <div class="chart-container doughnut">
+                                <canvas id="logLevelChart"></canvas>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================
+                         LOWER DASHBOARD
+                    ========================== -->
+
+                    <div class="dashboard-bottom-grid">
+
+
+                        <!-- Recent Logs -->
+
+                        <div class="panel recent-logs-panel">
+
+                            <div class="panel-header">
+
+                                <div>
+                                    <h3>Recent Logs</h3>
+                                    <span>Latest analyzed events</span>
+                                </div>
+
+                                <div class="table-tools">
+
+                                    <div class="table-search">
+
+                                        <span>⌕</span>
+
+                                        <input
+                                            type="text"
+                                            id="dashboardSearch"
+                                            placeholder="Search in logs..."
+                                        >
+
+                                    </div>
+
+                                    <button
+                                        class="filter-button"
+                                        id="quickFilterBtn"
+                                    >
+                                        ☷
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="table-wrapper">
+
+                                <table class="logs-table">
+
+                                    <thead>
+
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Level</th>
+                                            <th>IP Address</th>
+                                            <th>User</th>
+                                            <th>Event</th>
+                                            <th>Message</th>
+                                        </tr>
+
+                                    </thead>
+
+                                    <tbody id="recentLogsTable">
+
+                                        <tr class="empty-row">
+
+                                            <td colspan="6">
+
+                                                <div class="empty-state">
+
+                                                    <div class="empty-icon">
+                                                        ▤
+                                                    </div>
+
+                                                    <h4>No logs loaded</h4>
+
+                                                    <p>
+                                                        Upload a log file to begin analysis.
+                                                    </p>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Right Side -->
+
+                        <div class="dashboard-side">
+
+
+                            <!-- Top Users -->
+
+                            <div class="panel">
+
+                                <div class="panel-header">
+
+                                    <div>
+                                        <h3>Top Users</h3>
+                                        <span>Most active accounts</span>
+                                    </div>
+
+                                </div>
+
+                                <div
+                                    class="top-users-list"
+                                    id="topUsersList"
+                                >
+
+                                    <div class="empty-mini">
+                                        No user data
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Recent Alerts -->
+
+                            <div class="panel alerts-panel">
+
+                                <div class="panel-header">
+
+                                    <div>
+                                        <h3>Recent Alerts</h3>
+                                        <span>Security events</span>
+                                    </div>
+
+                                </div>
+
+                                <div
+                                    class="alerts-list"
+                                    id="recentAlertsList"
+                                >
+
+                                    <div class="empty-mini">
+                                        No alerts detected
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    class="view-alerts-btn"
+                                    data-page="suspicious"
+                                >
+                                    View All Alerts
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     LOG VIEWER PAGE
+                ========================== -->
+
+                <section class="page" id="logsPage">
+
+                    <div class="page-header">
+
+                        <div>
+                            <h2>Log Viewer</h2>
+                            <p>
+                                Browse and inspect analyzed log entries
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="panel full-panel">
+
+                        <div class="viewer-toolbar">
+
+                            <div class="table-search large-search">
+
+                                <span>⌕</span>
+
+                                <input
+                                    type="text"
+                                    id="logViewerSearch"
+                                    placeholder="Search logs..."
+                                >
+
+                            </div>
+
+                            <select id="levelFilter">
+                                <option value="all">All Levels</option>
+                                <option value="INFO">INFO</option>
+                                <option value="WARNING">WARNING</option>
+                                <option value="ERROR">ERROR</option>
+                                <option value="DEBUG">DEBUG</option>
+                            </select>
+
+                            <select id="eventFilter">
+                                <option value="all">All Events</option>
+                            </select>
+
+                            <button
+                                class="secondary-btn"
+                                id="resetFiltersBtn"
+                            >
+                                Reset
+                            </button>
+
+                        </div>
+
+
+                        <div class="table-wrapper large-table">
+
+                            <table class="logs-table">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Timestamp</th>
+                                        <th>Level</th>
+                                        <th>IP Address</th>
+                                        <th>User</th>
+                                        <th>Event</th>
+                                        <th>Message</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="allLogsTable">
+
+                                    <tr class="empty-row">
+
+                                        <td colspan="7">
+                                            <div class="empty-state">
+                                                <div class="empty-icon">▤</div>
+                                                <h4>No logs available</h4>
+                                                <p>Upload a log file to view entries.</p>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     SEARCH PAGE
+                ========================== -->
+
+                <section class="page" id="searchPage">
+
+                    <div class="page-header">
+
+                        <div>
+                            <h2>Search & Filter</h2>
+                            <p>
+                                Find specific events inside your logs
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="panel">
+
+                        <div class="advanced-search">
+
+                            <div class="form-group">
+
+                                <label>Search Query</label>
+
+                                <input
+                                    type="text"
+                                    id="advancedSearch"
+                                    placeholder="Search IP, username, event or message..."
+                                >
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <label>Log Level</label>
+
+                                <select id="advancedLevel">
+                                    <option value="all">All Levels</option>
+                                    <option value="INFO">INFO</option>
+                                    <option value="WARNING">WARNING</option>
+                                    <option value="ERROR">ERROR</option>
+                                    <option value="DEBUG">DEBUG</option>
+                                </select>
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <label>IP Address</label>
+
+                                <input
+                                    type="text"
+                                    id="advancedIP"
+                                    placeholder="e.g. 192.168.1.10"
+                                >
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <label>Username</label>
+
+                                <input
+                                    type="text"
+                                    id="advancedUser"
+                                    placeholder="e.g. admin"
+                                >
+
+                            </div>
+
+                            <button
+                                class="primary-btn"
+                                id="advancedSearchBtn"
+                            >
+                                Search Logs
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="panel search-results-panel">
+
+                        <div class="panel-header">
+
+                            <div>
+                                <h3>Search Results</h3>
+                                <span id="searchResultCount">
+                                    0 results
+                                </span>
+                            </div>
+
+                        </div>
+
+                        <div id="searchResults"></div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     STATISTICS PAGE
+                ========================== -->
+
+                <section class="page" id="statisticsPage">
+
+                    <div class="page-header">
+
+                        <div>
+                            <h2>Statistics</h2>
+                            <p>
+                                Detailed analysis of your log data
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="statistics-grid">
+
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>Log Activity</h3>
+                            </div>
+
+                            <div class="chart-container">
+                                <canvas id="statisticsTimelineChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>Event Distribution</h3>
+                            </div>
+
+                            <div class="chart-container">
+                                <canvas id="eventDistributionChart"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     IP ANALYSIS PAGE
+                ========================== -->
+
+                <section class="page" id="ip-analysisPage">
+
+                    <div class="page-header">
+
+                        <div>
+                            <h2>IP Analysis</h2>
+                            <p>
+                                Analyze activity by source IP address
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="panel full-panel">
+
+                        <div class="table-wrapper">
+
+                            <table class="analysis-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>IP Address</th>
+                                        <th>Total Events</th>
+                                        <th>Failed Logins</th>
+                                        <th>Users</th>
+                                        <th>Risk Level</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="ipAnalysisTable">
+
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="empty-state">
+                                                <div class="empty-icon">◎</div>
+                                                <h4>No IP data</h4>
+                                                <p>Analyze a log file first.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     USER ANALYSIS PAGE
+                ========================== -->
+
+                <section class="page" id="user-analysisPage">
+
+                    <div class="page-header">
+
+                        <div>
+                            <h2>User Analysis</h2>
+                            <p>
+                                Analyze account activity and authentication events
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="panel full-panel">
+
+                        <div class="table-wrapper">
+
+                            <table class="analysis-table">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Total Events</th>
+                                        <th>Successful Logins</th>
+                                        <th>Failed Logins</th>
+                                        <th>Risk Level</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="userAnalysisTable">
+
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="empty-state">
+                                                <div class="empty-icon">♙</div>
+                                                <h4>No user data</h4>
+                                                <p>Analyze a log file first.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     FAILED LOGINS PAGE
+                ========================== -->
+
+                <section class="page" id="failed-loginsPage">
+
+                    <div class="page-header">
+
+                        <div>
+                            <h2>Failed Logins</h2>
+                            <p>
+                                Authentication failures detected in the logs
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="security-summary-grid">
+
+                        <div class="security-card">
+                            <span>Total Failed Logins</span>
+                            <strong id="failedLoginPageCount">0</strong>
+                        </div>
+
+                        <div class="security-card">
+                            <span>Unique Source IPs</span>
+                            <strong id="failedLoginIPs">0</strong>
+                        </div>
+
+                        <div class="security-card">
+                            <span>Affected Users</span>
+                            <strong id="failedLoginUsers">0</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="panel full-panel">
+
+                        <div class="table-wrapper">
+
+                            <table class="logs-table">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>IP Address</th>
+                                        <th>User</th>
+                                        <th>Event</th>
+                                        <th>Message</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="failedLoginsTable">
+
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="empty-state">
+                                                <div class="empty-icon">🔒</div>
+                                                <h4>No failed logins</h4>
+                                                <p>No authentication failures detected.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     SUSPICIOUS EVENTS PAGE
+                ========================== -->
+
+                <section class="page" id="suspiciousPage">
+
+                    <div class="page-header">
+
+                        <div>
+                            <h2>Suspicious Events</h2>
+                            <p>
+                                Potentially malicious or abnormal activity
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="security-alert-list"
+                        id="suspiciousEventsList"
+                    >
+
+                        <div class="empty-state large-empty">
+
+                            <div class="empty-icon">⚠</div>
+
+                            <h4>No suspicious events</h4>
+
+                            <p>
+                                Security detections will appear here after analysis.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     BRUTE FORCE PAGE
+                ========================== -->
+
+                <section class="page" id="brute-forcePage">
+
+                    <div class="page-header">
+
+                        <div>
+                            <h2>Brute Force Detection</h2>
+                            <p>
+                                Repeated authentication attempts and attack patterns
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="panel full-panel">
+
+                        <div
+                            class="brute-force-results"
+                            id="bruteForceResults"
+                        >
+
+                            <div class="empty-state large-empty">
+
+                                <div class="empty-icon">◎</div>
+
+                                <h4>No brute-force attacks detected</h4>
+
+                                <p>
+                                    Detection results will appear here after log analysis.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     HISTORY PAGE
+                ========================== -->
+
+                <section class="page" id="historyPage">
+
+                    <div class="page-header">
+
+                        <div>
+                            <h2>Scan History</h2>
+                            <p>
+                                Previous log analysis sessions
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="panel full-panel">
+
+                        <div class="table-wrapper">
+
+                            <table class="analysis-table">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>File</th>
+                                        <th>Total Logs</th>
+                                        <th>Threats</th>
+                                        <th>Status</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="historyTable">
+
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="empty-state">
+                                                <div class="empty-icon">◷</div>
+                                                <h4>No scan history</h4>
+                                                <p>Your analysis sessions will appear here.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     REPORTS PAGE
+                ========================== -->
+
+                <section class="page" id="reportsPage">
+
+                    <div class="page-header">
+
+                        <div>
+                            <h2>Reports</h2>
+                            <p>
+                                Generate and export analysis reports
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="reports-grid">
+
+                        <div class="report-card">
+
+                            <div class="report-icon">
+                                ▤
+                            </div>
+
+                            <h3>Security Report</h3>
+
+                            <p>
+                                Generate a complete security analysis report.
+                            </p>
+
+                            <button
+                                class="primary-btn"
+                                id="generateReportBtn"
+                            >
+                                Generate Report
+                            </button>
+
+                        </div>
+
+
+                        <div class="report-card">
+
+                            <div class="report-icon">
+                                ⇩
+                            </div>
+
+                            <h3>Export Logs</h3>
+
+                            <p>
+                                Export filtered log data for further analysis.
+                            </p>
+
+                            <button
+                                class="secondary-btn"
+                                id="exportLogsBtn"
+                            >
+                                Export Data
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================
+                     SETTINGS PAGE
+                ========================== -->
+
+                <section class="page" id="settingsPage">
+
+                    <div class="page-header">
+
+                        <div>
+                            <h2>Settings</h2>
+                            <p>
+                                Configure LogScope behavior
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="settings-grid">
+
+                        <div class="panel">
+
+                            <div class="panel-header">
+                                <h3>Detection Settings</h3>
+                            </div>
+
+                            <div class="setting-item">
+
+                                <div>
+                                    <strong>Brute Force Detection</strong>
+                                    <span>
+                                        Detect repeated failed login attempts
+                                    </span>
+                                </div>
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        id="bruteForceSetting"
+                                        checked
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="setting-item">
+
+                                <div>
+                                    <strong>Suspicious Event Detection</strong>
+                                    <span>
+                                        Identify potentially dangerous log events
+                                    </span>
+                                </div>
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        id="suspiciousSetting"
+                                        checked
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="panel">
+
+                            <div class="panel-header">
+                                <h3>Interface</h3>
+                            </div>
+
+                            <div class="setting-item">
+
+                                <div>
+                                    <strong>Animations</strong>
+                                    <span>
+                                        Enable interface animations
+                                    </span>
+                                </div>
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        id="animationsSetting"
+                                        checked
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <!-- =========================
+         LOG DETAIL MODAL
+    ========================== -->
+
+    <div class="modal-overlay" id="logDetailModal">
+
+        <div class="modal">
+
+            <div class="modal-header">
+
+                <div>
+                    <h3>Log Event Details</h3>
+                    <span>Detailed event information</span>
+                </div>
+
+                <button
+                    class="modal-close"
+                    id="closeLogModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <div
+                class="modal-content"
+                id="logDetailContent"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         HELP MODAL
+    ========================== -->
+
+    <div class="modal-overlay" id="helpModal">
+
+        <div class="modal">
+
+            <div class="modal-header">
+
+                <div>
+                    <h3>LogScope Help</h3>
+                    <span>Quick guide</span>
+                </div>
+
+                <button
+                    class="modal-close"
+                    id="closeHelpModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <div class="modal-content help-content">
+
+                <h4>Getting Started</h4>
+
+                <p>
+                    Upload a supported log file using the
+                    <strong>Open Log</strong> button.
+                </p>
+
+                <h4>Supported Files</h4>
+
+                <p>
+                    LogScope supports common
+                    <strong>.log</strong>,
+                    <strong>.txt</strong>, and
+                    <strong>.csv</strong> files.
+                </p>
+
+                <h4>Analysis</h4>
+
+                <p>
+                    After uploading a file, LogScope parses the entries,
+                    calculates statistics, extracts IP addresses and users,
+                    and checks for suspicious activity.
+                </p>
+
+                <h4>Security Detection</h4>
+
+                <p>
+                    The detection engine can identify repeated failed
+                    authentication attempts and other suspicious patterns.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         TOAST NOTIFICATION
+    ========================== -->
+
+    <div
+        class="toast-container"
+        id="toastContainer"
+    ></div>
+
+
+    <!-- =========================
+         APPLICATION SCRIPTS
+    ========================== -->
+
+    <script src="js/parser.js"></script>
+    <script src="js/analyzer.js"></script>
+    <script src="js/detector.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+</html>
