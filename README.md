@@ -227,31 +227,6 @@ Detections are presented through the dashboard, alert views, and generated repor
 
 ---
 
-## 📊 Dashboard Workflow
-
-```text
-Log File
-   │
-   ▼
-Parser
-   │
-   ▼
-Structured Log Entries
-   │
-   ├───────────────┐
-   ▼               ▼
-Analyzer        Detector
-   │               │
-   └───────┬───────┘
-           ▼
-        Charts
-           │
-           ▼
-       Dashboard
-```
-
----
-
 ## 🌐 Deployment
 
 TraceX is designed to run as a static web application, making it suitable for deployment through services that host static Git repositories.
@@ -305,7 +280,7 @@ into one browser-based security tool.
 
 ## 👨‍💻 Author
 
-**Your Name**
+**Zorro**
 
 Built as a cybersecurity-focused web application project.
 
